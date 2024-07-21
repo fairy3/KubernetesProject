@@ -1,0 +1,7 @@
+Token:
+7027387278:AAGgDAbsCCiVh1D-ebWBTnBtwsj5SZMC1EU
+TELEGRAM_APP_URL:
+https://f140-176-230-41-54.ngrok-free.app
+
+TELEGRAM_TOKEN = '7027387278:AAGgDAbsCCiVh1D-ebWBTnBtwsj5SZMC1EU'    #os.getenv('TELEGRAM_TOKEN')
+TELEGRAM_APP_URL = 'https://3b07-176-230-41-54.ngrok-free.app'
