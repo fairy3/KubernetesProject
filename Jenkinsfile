@@ -45,7 +45,10 @@ pipeline {
 
       stage('Deploy to kubernetes') {
          steps {
-                sh '''
+             script {
+
+
+                             sh '''
               echo "kubectl could not be found, installing..."
               apt-get update && apt-get install -y curl
               curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
