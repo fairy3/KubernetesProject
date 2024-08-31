@@ -45,14 +45,16 @@ pipeline {
 
       stage('Deploy to kubernetes') {
          steps {
+                sh '''
               echo "kubectl could not be found, installing..."
               apt-get update && apt-get install -y curl
               curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
               chmod +x ./kubectl
               mv ./kubectl /usr/local/bin/kubectl
                 echo "Deploying to k8s cluster"
-                sh 'kubectl apply -f k8s/app-deployment.yaml --namespace=jenkins'
+                kubectl apply -f k8s/app-deployment.yaml --namespace=jenkins
                   //sh 'kubectl apply -f k8s/app-service.yaml'
+              '''
              }
          }
       }
