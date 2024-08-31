@@ -10,7 +10,7 @@ pipeline {
         spec:
           containers:
           - name: jenkins-agent
-            image: jenkins-agent:latest
+            image: jenkins/agent:latest
             command:
             - cat
             tty: true
