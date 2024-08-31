@@ -55,7 +55,6 @@ pipeline {
 
                     echo "Deploying to k8s cluster"
                     ./kubectl apply -f k8s/app-deployment.yaml --namespace=jenkins
-                      //sh 'kubectl apply -f k8s/app-service.yaml'
               '''
              }
          }
