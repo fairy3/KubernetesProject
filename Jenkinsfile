@@ -10,7 +10,7 @@ pipeline {
         spec:
           containers:
           - name: jenkins-agent
-            image: binlab/jenkins-agent
+            image: mecodia/jenkins-kubectl:latest
             command:
             - cat
             tty: true
@@ -45,7 +45,14 @@ pipeline {
 
       stage('Deploy to kubernetes') {
          steps {
-             script {
+            if ! command -v kubectl &> /dev/null
+            then
+              echo "kubectl could not be found, installing..."
+              apt-get update && apt-get install -y curl
+              curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
+              chmod +x ./kubectl
+              mv ./kubectl /usr/local/bin/kubectl
+            fi
                 echo "Deploying to k8s cluster"
                 sh 'kubectl apply -f k8s/app-deployment.yaml --namespace=jenkins'
                   //sh 'kubectl apply -f k8s/app-service.yaml'
