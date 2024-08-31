@@ -111,14 +111,15 @@ pipeline {
             }
       }
 
-      stage('Deploy') {
-            steps {
-              echo "Deploying to k8s cluster"
-              sh 'kubectl.apply('-f k8s/app-deployment.yaml')'
-              sh 'kubectl apply -f k8s/app-service.yaml'
-            }
-        }
-    }
+      stage('Deploy to kubernetes') {
+         steps {
+             script {
+                echo "Deploying to k8s cluster"
+                  sh 'kubectl apply -f k8s/app-deployment.yaml'
+                  sh 'kubectl apply -f k8s/app-service.yaml'
+             }
+         }
+      }
 
     post {
         always {
