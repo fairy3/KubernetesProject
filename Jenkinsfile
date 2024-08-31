@@ -121,6 +121,8 @@ pipeline {
          }
       }
 
+   }
+
     post {
         always {
             // Clean up the workspace!
