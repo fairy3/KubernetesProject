@@ -1,0 +1,25 @@
+# docker-compose.yml
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ./app
+    image: python-app-image:latest    
+    ports:
+      - "5000:5000"
+    networks:
+      - my_network
+
+  web:
+    build:
+      context: ./web
+    image: web-image:latest    
+    ports:
+      - "8081:80"
+    networks:
+      - my_network
+
+networks:
+  my_network:
+
