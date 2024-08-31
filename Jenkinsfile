@@ -114,8 +114,8 @@ pipeline {
       stage('Deploy') {
             steps {
               echo "Deploying to k8s cluster"
-              kubectl.apply('-f k8s/app-deployment.yaml')
-              kubectl.apply('-f k8s/app-service.yaml')
+              sh 'kubectl.apply('-f k8s/app-deployment.yaml')'
+              sh 'kubectl apply -f k8s/app-service.yaml'
             }
         }
     }
