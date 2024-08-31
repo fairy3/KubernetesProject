@@ -47,8 +47,8 @@ pipeline {
          steps {
              script {
                 echo "Deploying to k8s cluster"
-                  sh 'kubectl apply -f k8s/app-deployment.yaml'
-                  sh 'kubectl apply -f k8s/app-service.yaml'
+                sh 'kubectl apply -f k8s/app-deployment.yaml --namespace=jenkins'
+                  //sh 'kubectl apply -f k8s/app-service.yaml'
              }
          }
       }
