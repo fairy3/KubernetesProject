@@ -10,7 +10,7 @@ pipeline {
         spec:
           containers:
           - name: jenkins-agent
-            image: mecodia/jenkins-kubectl:latest
+            image: binlab/jenkins-agent
             command:
             - cat
             tty: true
