@@ -53,8 +53,9 @@ pipeline {
                   curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
                   chmod +x ./kubectl
 
-                    echo "Deploying to k8s cluster"
-                    ./kubectl apply -f k8s/app-deployment.yaml
+                  echo "Deploying to k8s cluster"
+                  ./kubectl apply -f k8s/app-deployment.yaml
+                  ./kubectl apply -f k8s/app-service.yaml
               '''
              }
          }
