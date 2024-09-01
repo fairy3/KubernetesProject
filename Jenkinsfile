@@ -54,7 +54,7 @@ pipeline {
                   chmod +x ./kubectl
 
                     echo "Deploying to k8s cluster"
-                    ./kubectl apply -f k8s/app-deployment.yaml --namespace=jenkins
+                    ./kubectl apply -f k8s/app-deployment.yaml
               '''
              }
          }
