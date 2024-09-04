@@ -29,7 +29,6 @@ pipeline {
         WEB_IMAGE_NAME = 'web-image'
         DOCKER_COMPOSE_FILE = 'docker-compose.yml'
         BUILD_DATE = new Date().format('yyyyMMdd-HHmmss')
-        IMAGE_TAG = "v1.0.0-${BUILD_NUMBER}-${BUILD_DATE}"
     }
 
     stages {
