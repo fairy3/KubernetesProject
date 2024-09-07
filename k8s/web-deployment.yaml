@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  labels:
+    app: web
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: web
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+
+        resources:
+          requests:
+            memory: "236Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "200"
+
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /alive
+            port: 80
+            scheme: HTTP
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /ready
+            port: 80
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5 
+            
+        volumeMounts:
+        - name: nginx-storage
+          mountPath: /usr/share/nginx/html
+      
+      volumes:
+      - name: nginx-storage
+        persistentVolumeClaim:
+          claimName: nginx-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: nginx-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: web-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: web
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 50 
