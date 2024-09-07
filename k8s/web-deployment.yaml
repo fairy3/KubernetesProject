@@ -29,9 +29,9 @@ spec:
             memory: "512Mi"
             cpu: "200"
 
-        volumeMounts:
-        - name: nginx-storage
-          mountPath: /usr/share/nginx/html
+#        volumeMounts:
+#        - name: nginx-storage
+#          mountPath: /usr/share/nginx/html
       
       volumes:
       - name: nginx-storage
