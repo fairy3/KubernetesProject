@@ -29,27 +29,6 @@ spec:
             memory: "512Mi"
             cpu: "200"
 
-        livenessProbe:
-          failureThreshold: 10
-          httpGet:
-            path: /alive
-            port: 80
-            scheme: HTTP
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-
-        readinessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /ready
-            port: 80
-            scheme: HTTP
-          initialDelaySeconds: 10
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5 
-            
         volumeMounts:
         - name: nginx-storage
           mountPath: /usr/share/nginx/html
