@@ -52,9 +52,9 @@ pipeline {
                     // Build Docker image using docker-compose
                     sh '''
                     touch aaa
+                    ls -l /usr/local/bin/docker-compose || true
                     sleep 3600
                     hostname
-                    ls -l /usr/local/bin/docker-compose
                     /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
                     '''
                 }
