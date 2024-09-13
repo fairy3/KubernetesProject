@@ -111,6 +111,7 @@ pipeline {
 
                     // Update the Kubernetes manifests (e.g., deployment.yaml) with the new image tag
                     sh """
+                    set -x
                     git config --global user.email "bot@example.com"
                     git config --global user.name "Bot"
                     sed -i 's|image: app:.*|image: app:${IMAGE_TAG}|g' k8s/app-deployment.yaml
