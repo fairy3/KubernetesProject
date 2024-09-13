@@ -69,39 +69,39 @@ pipeline {
             }
         }
 
-       stage('Nexus login') {
-            steps {
-                container ('docker') {
-                    nexusLogin("${NEXUS_CREDENTIALS_ID}","${NEXUS_PROTOCOL}","${NEXUS_URL}", "${NEXUS_REPOSITORY}")
-                }
-            }
-       }
+      // stage('Nexus login') {
+      //      steps {
+      //          container ('docker') {
+      //              nexusLogin("${NEXUS_CREDENTIALS_ID}","${NEXUS_PROTOCOL}","${NEXUS_URL}", "${NEXUS_REPOSITORY}")
+      //          }
+      //      }
+      // }
 
       stage('Tag and Push To Nexus') {
          steps {
             container ('docker') {
                 sh '''
                     docker tag ${APP_IMAGE_NAME}:latest ${NEXUS_URL}/${APP_IMAGE_NAME}:${IMAGE_TAG}
-                    docker push ${NEXUS_URL}/${APP_IMAGE_NAME}:${IMAGE_TAG}
+                    #docker push ${NEXUS_URL}/${APP_IMAGE_NAME}:${IMAGE_TAG}
                     docker tag ${WEB_IMAGE_NAME}:latest ${NEXUS_URL}/${WEB_IMAGE_NAME}:${IMAGE_TAG}
-                    docker push ${NEXUS_URL}/${WEB_IMAGE_NAME}:${IMAGE_TAG}
+                    #docker push ${NEXUS_URL}/${WEB_IMAGE_NAME}:${IMAGE_TAG}
                  '''
             }
         }
       }
 
-      stage('Install Kubernetes') {
-        steps {
-             container ('docker') {
-
-              sh '''
-                  echo "kubectl could not be found, installing..."
-                  curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
-                  chmod +x ./kubectl
-              '''
-             }
-         }
-      }
+      //stage('Install Kubernetes') {
+      //  steps {
+      //       container ('docker') {
+//
+      //        sh '''
+      //            echo "kubectl could not be found, installing..."
+      //            curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
+      //            chmod +x ./kubectl
+      //        '''
+      //       }
+      //   }
+      //}
 
       stage('Update Manifests') {
             steps {
