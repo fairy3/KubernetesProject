@@ -48,7 +48,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
+                 container('jenkins-agent') {
                     // Build Docker image using docker-compose
                     sh '''
                     pwd
