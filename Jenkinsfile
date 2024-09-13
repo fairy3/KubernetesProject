@@ -1,13 +1,16 @@
+@Library("my-shared-library") _
 pipeline {
   agent {
     kubernetes {
       yaml '''
         apiVersion: v1
         kind: Pod
+        metadata:
+          namespace: jenkins
         spec:
           containers:
-          - name: maven
-            image: maven:alpine
+          - name: jenkins-agent
+            image: mecodia/jenkins-kubectl:latest
             command:
             - cat
             tty: true
@@ -26,48 +29,123 @@ pipeline {
         '''
     }
   }
-  stages {
-    stage('Clone') {
-      steps {
-        container('maven') {
-          git branch: 'main', changelog: false, poll: false, url: 'https://mohdsabir-cloudside@bitbucket.org/mohdsabir-cloudside/java-app.git'
+
+  options {
+        disableConcurrentBuilds()
+        buildDiscarder(logRotator(daysToKeepStr: '30'))
+        timestamps()
+    }
+
+    environment {
+        APP_IMAGE_NAME = 'python-app-image'
+        WEB_IMAGE_NAME = 'web-image'
+        DOCKER_COMPOSE_FILE = 'docker-compose.yml'
+        BUILD_DATE = new Date().format('yyyyMMdd-HHmmss')
+        IMAGE_TAG = "v1.0-${BUILD_NUMBER}-${BUILD_DATE}"
+        SNYK_TOKEN = credentials('snyk-token')
+        NEXUS_PROTOCOL = "http"
+        NEXUS_URL = "172.24.216.163:8888"
+        NEXUS_REPOSITORY = "my-docker-repo"
+        NEXUS_CREDENTIALS_ID = "nexus"
+    }
+
+    stages {
+        stage('Hello') {
+           steps {
+            wrap([$class: 'BuildUser']) {
+              greet()
+            }
+           }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                 container ('docker') {
+                    // Build Docker image using docker-compose
+                    sh '''
+                    /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
+                    '''
+                }
+            }
+        }
+
+        stage('Snyk login') {
+            steps {
+                snykLogin('${SNYK_TOKEN}')
+            }
+        }
+
+        stage('Snyk Container Test') {
+            steps {
+                container('maven') {
+                    // Test Docker image for vulnerabilities
+                    sh 'snyk container test ${APP_IMAGE_NAME}:latest --policy-path=.snyk'
+               }
+           }
+       }        
+
+       stage('Nexus login') {
+            steps {
+                nexusLogin("${NEXUS_CREDENTIALS_ID}","${NEXUS_PROTOCOL}","${NEXUS_URL}", "${NEXUS_REPOSITORY}")
+            }
+       }
+
+      stage('Tag and Push To Nexus') {
+         steps {
+            container ('docker') {
+                sh '''
+                    docker tag ${APP_IMAGE_NAME}:latest ${NEXUS_URL}/${APP_IMAGE_NAME}:${IMAGE_TAG}
+                    docker push ${NEXUS_URL}/${APP_IMAGE_NAME}:${IMAGE_TAG}
+                    docker tag ${WEB_IMAGE_NAME}:latest ${NEXUS_URL}/${WEB_IMAGE_NAME}:${IMAGE_TAG}
+                    docker push ${NEXUS_URL}/${WEB_IMAGE_NAME}:${IMAGE_TAG}
+                 '''
+            }
         }
       }
-    }
-    stage('Build-Jar-file') {
-      steps {
-        container('maven') {
-          sh 'mvn package'
-        }
+
+      stage('Install Kubernetes') {
+        steps {
+             container ('docker') {
+
+              sh '''
+                  echo "kubectl could not be found, installing..."
+                  curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
+                  chmod +x ./kubectl
+              '''
+             }
+         }
       }
-    }
-    stage('Build-Docker-Image') {
-      steps {
-        container('docker') {
-          sh 'docker build -t ss69261/testing-image:latest .'
-        }
+
+      stage('Update Manifests') {
+            steps {
+                container ('docker') {
+                    // Assuming you build a Docker image and tag it
+                    //def dockerImageTag = ${IMAGE_TAG}
+
+                    // Update the Kubernetes manifests (e.g., deployment.yaml) with the new image tag
+                    sh """
+                    sed -i 's|image: app:.*|image: app:${IMAGE_TAG}|g' k8s/app-deployment.yaml
+                    git add k8s/app-deployment.yaml
+                    git commit -m "Update image to ${IMAGE_TAG}"
+                    git push origin main
+                    """
+                }
       }
-    }
-    stage('Login-Into-Docker') {
-      steps {
-        container('docker') {
-          sh 'docker login -u <docker_username> -p <docker_password>'
-      }
-    }
-    }
-     stage('Push-Images-Docker-to-DockerHub') {
-      steps {
-        container('docker') {
-          sh 'docker push ss69261/testing-image:latest'
-      }
-    }
-     }
-  }
+   }
+   }
+
+
     post {
-      always {
-        container('docker') {
-          sh 'docker logout'
-      }
-      }
+        always {
+            // Clean up the workspace!
+            cleanWs()
+        }
+        success {
+            echo "Build ${BUILD_NUMBER} has succeeded"
+        }
+        failure {
+            echo "Build ${BUILD_NUMBER} has failed"
+        }
     }
 }
+
