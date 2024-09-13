@@ -113,7 +113,7 @@ pipeline {
                     sh """
                     git checkout main
                     git config --global user.email "fairy3@gmail.com"
-                    git config --global user.name "Rima Polsky (Bot)"
+                    git config --global user.name "fairy3"
                     sed -i 's|image: rimap2610/web-image:.*|image: rimap2610/web-image:${IMAGE_TAG}|g' k8s/app-deployment.yaml
                     git diff
                     git add k8s/app-deployment.yaml
