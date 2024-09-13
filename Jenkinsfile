@@ -50,7 +50,7 @@ pipeline {
             steps {
                 script {
                     // Build Docker image using docker-compose
-                    sh 'docker-compose -f ${DOCKER_COMPOSE_FILE} build'
+                    sh '/usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build'
                 }
             }
         }
