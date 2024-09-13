@@ -114,7 +114,7 @@ pipeline {
                     set -x
                     git config --global user.email "bot@example.com"
                     git config --global user.name "Bot"
-                    sed -i 's|image: app:.*|image: app:${IMAGE_TAG}|g' k8s/app-deployment.yaml
+                    sed -i 's|image: rimap2610/web-image:.*|image: rimap2610/web-image:${IMAGE_TAG}|g' k8s/app-deployment.yaml
                     git diff
                     git add k8s/app-deployment.yaml
                     git commit -m "Update image to ${IMAGE_TAG}"
