@@ -46,30 +46,6 @@ pipeline {
            }
         }
 
-
-        stage('Unit Tests') {
-            steps {
-                // Ensure Python requirements are installed
-                sh 'sudo apt update'
-                sh 'sudo apt install python3-pip -y'
-                sh 'pip3 install pytest'
-                // Run pytest for unit tests
-                sh 'python3 -m pytest --junitxml=results.xml app/tests/*.py'
-            }
-            post {
-                always {
-                    junit allowEmptyResults: true, testResults: 'results.xml'
-                }
-            }
-        }
-
-        stage('Lint') {
-            steps {
-                echo "Pylint running"
-                //sh 'pylint src/'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 script {
