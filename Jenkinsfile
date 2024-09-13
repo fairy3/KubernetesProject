@@ -14,6 +14,18 @@ pipeline {
             command:
             - cat
             tty: true
+          - name: docker
+            image: docker:latest
+            command:
+            - cat
+            tty: true
+            volumeMounts:
+             - mountPath: /var/run/docker.sock
+               name: docker-sock
+          volumes:
+          - name: docker-sock
+            hostPath:
+              path: /var/run/docker.sock
         '''
     }
   }
@@ -48,14 +60,9 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                 container('jenkins-agent') {
+                 container ('docker') {
                     // Build Docker image using docker-compose
                     sh '''
-                    pwd
-                    touch aaa
-                    ls -l /usr/local/bin
-                    sleep 3600
-                    hostname
                     /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
                     '''
                 }
@@ -85,7 +92,7 @@ pipeline {
 
       stage('Tag and Push To Nexus') {
              steps {
-                script {
+                container ('docker') {
                 sh '''
                     docker tag ${APP_IMAGE_NAME}:latest ${NEXUS_URL}/${APP_IMAGE_NAME}:${IMAGE_TAG}
                     docker push ${NEXUS_URL}/${APP_IMAGE_NAME}:${IMAGE_TAG}
