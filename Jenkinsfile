@@ -10,7 +10,7 @@ pipeline {
         spec:
           containers:
           - name: jenkins-agent
-            image: docker:dind
+            image: mecodia/jenkins-kubectl:latest
             command:
             - cat
             tty: true
@@ -77,7 +77,7 @@ pipeline {
 
         stage('Snyk Container Test') {
             steps {
-                script {
+                container('maven') {
                     // Test Docker image for vulnerabilities
                     sh 'snyk container test ${APP_IMAGE_NAME}:latest --policy-path=.snyk'
                }
@@ -91,21 +91,21 @@ pipeline {
        }
 
       stage('Tag and Push To Nexus') {
-             steps {
-                container ('docker') {
+         steps {
+            container ('docker') {
                 sh '''
                     docker tag ${APP_IMAGE_NAME}:latest ${NEXUS_URL}/${APP_IMAGE_NAME}:${IMAGE_TAG}
                     docker push ${NEXUS_URL}/${APP_IMAGE_NAME}:${IMAGE_TAG}
                     docker tag ${WEB_IMAGE_NAME}:latest ${NEXUS_URL}/${WEB_IMAGE_NAME}:${IMAGE_TAG}
                     docker push ${NEXUS_URL}/${WEB_IMAGE_NAME}:${IMAGE_TAG}
                  '''
-                }
             }
+        }
       }
 
       stage('Install Kubernetes') {
         steps {
-             script {
+             container ('docker') {
 
               sh '''
                   echo "kubectl could not be found, installing..."
@@ -118,7 +118,7 @@ pipeline {
 
       stage('Update Manifests') {
             steps {
-                script {
+                container ('docker') {
                     // Assuming you build a Docker image and tag it
                     def dockerImageTag = ${IMAGE_TAG}
 
