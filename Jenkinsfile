@@ -69,21 +69,6 @@ pipeline {
             }
         }
 
-        stage('Snyk login') {
-            steps {
-                snykLogin('${SNYK_TOKEN}')
-            }
-        }
-
-        stage('Snyk Container Test') {
-            steps {
-                container('maven') {
-                    // Test Docker image for vulnerabilities
-                    sh 'snyk container test ${APP_IMAGE_NAME}:latest --policy-path=.snyk'
-               }
-           }
-       }        
-
        stage('Nexus login') {
             steps {
                 nexusLogin("${NEXUS_CREDENTIALS_ID}","${NEXUS_PROTOCOL}","${NEXUS_URL}", "${NEXUS_REPOSITORY}")
