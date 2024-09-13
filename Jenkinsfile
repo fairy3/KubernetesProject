@@ -51,8 +51,9 @@ pipeline {
                 script {
                     // Build Docker image using docker-compose
                     sh '''
+                    pwd
                     touch aaa
-                    ls -l /usr/local/bin/docker-compose || true
+                    ls -l /usr/local/bin
                     sleep 3600
                     hostname
                     /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
