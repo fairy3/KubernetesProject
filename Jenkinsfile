@@ -71,7 +71,9 @@ pipeline {
 
        stage('Nexus login') {
             steps {
-                nexusLogin("${NEXUS_CREDENTIALS_ID}","${NEXUS_PROTOCOL}","${NEXUS_URL}", "${NEXUS_REPOSITORY}")
+                container ('docker') {
+                    nexusLogin("${NEXUS_CREDENTIALS_ID}","${NEXUS_PROTOCOL}","${NEXUS_URL}", "${NEXUS_REPOSITORY}")
+                }
             }
        }
 
