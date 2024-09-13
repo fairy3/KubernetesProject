@@ -50,8 +50,8 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 // Ensure Python requirements are installed
-                sh 'apt update'
-                sh 'apt install python3-pip -y'
+                sh 'sudo apt update'
+                sh 'sudo apt install python3-pip -y'
                 sh 'pip3 install pytest'
                 // Run pytest for unit tests
                 sh 'python3 -m pytest --junitxml=results.xml app/tests/*.py'
