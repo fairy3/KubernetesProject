@@ -120,13 +120,13 @@ pipeline {
             steps {
                 container ('docker') {
                     // Assuming you build a Docker image and tag it
-                    def dockerImageTag = ${IMAGE_TAG}
+                    //def dockerImageTag = ${IMAGE_TAG}
 
                     // Update the Kubernetes manifests (e.g., deployment.yaml) with the new image tag
                     sh """
-                    sed -i 's|image: app:.*|image: app:${dockerImageTag}|g' k8s/app-deployment.yaml
+                    sed -i 's|image: app:.*|image: app:${IMAGE_TAG}|g' k8s/app-deployment.yaml
                     git add k8s/app-deployment.yaml
-                    git commit -m "Update image to ${dockerImageTag}"
+                    git commit -m "Update image to ${IMAGE_TAG}"
                     git push origin main
                     """
                 }
