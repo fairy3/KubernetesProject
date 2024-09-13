@@ -105,7 +105,7 @@ pipeline {
 
       stage('Update Manifests') {
             steps {
-                container ('docker') {
+                script {
                     // Assuming you build a Docker image and tag it
                     //def dockerImageTag = ${IMAGE_TAG}
 
