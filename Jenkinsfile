@@ -114,8 +114,10 @@ pipeline {
                     git config --global user.email "bot@example.com"
                     git config --global user.name "Bot"
                     sed -i 's|image: app:.*|image: app:${IMAGE_TAG}|g' k8s/app-deployment.yaml
+                    git diff
                     git add k8s/app-deployment.yaml
                     git commit -m "Update image to ${IMAGE_TAG}"
+                    git status
                     git push origin main
                     """
                 }
