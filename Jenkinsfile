@@ -76,7 +76,6 @@ pipeline {
 
                         // Set environment variable to indicate skipping the build
                         env.SKIP_BUILD = 'true'
-                        return
                      }
                 }
             }
