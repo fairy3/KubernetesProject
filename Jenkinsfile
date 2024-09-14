@@ -123,8 +123,9 @@ pipeline {
                         git commit -m "Update image to ${IMAGE_TAG}"
                         git status
                         git push origin main
-                        """
+                      """
                     }
+                }
             }
       }
    }
