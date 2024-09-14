@@ -42,14 +42,16 @@ pipeline {
         DOCKER_COMPOSE_FILE = 'docker-compose.yml'
         BUILD_DATE = new Date().format('yyyyMMdd-HHmmss')
         IMAGE_TAG = "v1.0-${BUILD_NUMBER}-${BUILD_DATE}"
+        SNYK_TOKEN = credentials('snyk-token')
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "172.24.216.163:8888"
         NEXUS_REPOSITORY = "my-docker-repo"
         NEXUS_CREDENTIALS_ID = "nexus"
         GIT_CREDENTIALS_ID = 'github'
-        SKIP_BUILD = ''
     }
 
+    def autoCancelled = false
+    try {
     stages {
         stage('Hello') {
            steps {
@@ -59,71 +61,101 @@ pipeline {
            }
         }
 
-        stage('Initialize') {
-      steps {
-        script {
-          // Initialize Groovy variables
-          env.SKIP_BUILD = ''
-        }
-      }
-    }
          stage('Check Commit') {
-             steps {
+            steps {
                 script {
-                     def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
-                     if (commitMessage.contains('[ci skip]')) {
-                        echo 'This is an automated commit. Skipping build.'
+            def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
 
-                        // Set environment variable to indicate skipping the build
-                        env.SKIP_BUILD = 'true'
-                        echo env.SKIP_BUILD
-                     }
+            if (commitMessage.contains('[ci skip]')) {
+                autoCancelled = true
+                echo 'This is an automated commit. Skipping build.'
+                        currentBuild.result = 'SUCCESS'
+                error ("Skipping build")
+            }
+        }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                 container ('docker') {
+                    // Build Docker image using docker-compose
+                    sh '''
+                    /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
+                    '''
                 }
             }
-         }
+        }
 
-         stage('Build Docker Image') {
-      steps {
-        script {
-          echo env.SKIP_BUILD
-          if (env.SKIP_BUILD != 'true') {
-            container('docker') {
-              // Build Docker image using docker-compose
-              sh '''
-              /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
-              '''
+
+      // stage('Nexus login') {
+      //      steps {
+      //          container ('docker') {
+      //              nexusLogin("${NEXUS_CREDENTIALS_ID}","${NEXUS_PROTOCOL}","${NEXUS_URL}", "${NEXUS_REPOSITORY}")
+      //          }
+      //      }
+      // }
+
+      stage('Tag and Push To Nexus') {
+         steps {
+            container ('docker') {
+                sh '''
+                    docker tag ${APP_IMAGE_NAME}:latest ${NEXUS_URL}/${APP_IMAGE_NAME}:${IMAGE_TAG}
+                    #docker push ${NEXUS_URL}/${APP_IMAGE_NAME}:${IMAGE_TAG}
+                    docker tag ${WEB_IMAGE_NAME}:latest ${NEXUS_URL}/${WEB_IMAGE_NAME}:${IMAGE_TAG}
+                    #docker push ${NEXUS_URL}/${WEB_IMAGE_NAME}:${IMAGE_TAG}
+                 '''
             }
-          } else {
-            echo 'Skipping Build Docker Image stage due to [ci skip].'
-          }
         }
       }
-    }
 
-       stage('Update Manifests') {
-      steps {
-        script {
-          echo env.SKIP_BUILD
-          if (env.SKIP_BUILD != 'true') {
-            // Update the Kubernetes manifests (e.g., deployment.yaml) with the new image tag
-            withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-              sh """
-                git checkout main
-                git config --global user.email "fairy3@gmail.com"
-                git config --global user.name "fairy3"
-                sed -i 's|image: rimap2610/web-image:.*|image: rimap2610/web-image:${IMAGE_TAG}|g' k8s/web-deployment.yaml
-                git add k8s/web-deployment.yaml
-                git commit -m "Update image to ${IMAGE_TAG} [ci skip]"
-                git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/fairy3/KubernetesProject.git
-              """
+
+      //stage('Install Kubernetes') {
+      //  steps {
+      //       container ('docker') {
+//
+      //        sh '''
+      //            echo "kubectl could not be found, installing..."
+      //            curl -LO "https://dl.k8s.io/release/v1.24.0/bin/linux/amd64/kubectl"
+      //            chmod +x ./kubectl
+      //        '''
+      //       }
+      //   }
+      //}
+
+      stage('Update Manifests') {
+            steps {
+                script {
+                    // Assuming you build a Docker image and tag it
+                    //def dockerImageTag = ${IMAGE_TAG}
+
+                    // Update the Kubernetes manifests (e.g., deployment.yaml) with the new image tag
+                    withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                      sh """
+                        git checkout main
+                        git config --global user.email "fairy3@gmail.com"
+                        git config --global user.name "fairy3"
+                        sed -i 's|image: rimap2610/web-image:.*|image: rimap2610/web-image:${IMAGE_TAG}|g' k8s/web-deployment.yaml
+                        git diff
+                        git add k8s/web-deployment.yaml
+                        git commit -m "Update image to ${IMAGE_TAG} [ci skip]"
+                        git status
+                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/fairy3/KubernetesProject.git
+                      """
+                    }
+                }
             }
-          } else {
-            echo 'Skipping Update Manifests stage due to [ci skip].'
-          }
-        }
       }
-    }
+   }
+   } catch (e) {
+  if (autoCancelled) {
+    currentBuild.result = 'SUCCESS'
+    // return here instead of throwing error to keep the build "green"
+    return
   }
+  // normal error handling
+  throw e
+}
 
 
     post {
