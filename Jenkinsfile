@@ -47,6 +47,7 @@ pipeline {
         NEXUS_URL = "172.24.216.163:8888"
         NEXUS_REPOSITORY = "my-docker-repo"
         NEXUS_CREDENTIALS_ID = "nexus"
+        GIT_CREDENTIALS_ID = "github"
     }
 
     stages {
@@ -111,18 +112,19 @@ pipeline {
                     //def dockerImageTag = ${IMAGE_TAG}
 
                     // Update the Kubernetes manifests (e.g., deployment.yaml) with the new image tag
-                    sh """
-                    git checkout main
-                    git config --global user.email "fairy3@gmail.com"
-                    git config --global user.name "fairy3"
-                    sed -i 's|image: rimap2610/web-image:.*|image: rimap2610/web-image:${IMAGE_TAG}|g' k8s/web-deployment.yaml
-                    git diff
-                    git add k8s/web-deployment.yaml
-                    git commit -m "Update image to ${IMAGE_TAG}"
-                    git status
-                    git push origin main
-                    """
-                }
+                    withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                      sh """
+                        git checkout main
+                        git config --global user.email "fairy3@gmail.com"
+                        git config --global user.name "fairy3"
+                        sed -i 's|image: rimap2610/web-image:.*|image: rimap2610/web-image:${IMAGE_TAG}|g' k8s/web-deployment.yaml
+                        git diff
+                        git add k8s/web-deployment.yaml
+                        git commit -m "Update image to ${IMAGE_TAG}"
+                        git status
+                        git push origin main
+                        """
+                    }
             }
       }
    }
