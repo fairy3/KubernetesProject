@@ -59,38 +59,45 @@ pipeline {
            }
         }
 
-         stage('Check commit') {
-            if (sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim().contains('[ci skip]')) {
-                 echo 'This is an automated commit. Skipping build.'
-                currentBuild.result = 'SUCCESS'
-                return
+
+         stage('Check Commit') {
+             steps {
+                script {
+                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+
+                    if (commitMessage.contains('[ci skip]')) {
+                         echo 'This is an automated commit. Skipping build.'
+                         currentBuild.result = 'SUCCESS'
+                         //error ("Skipping build")
+                         env.SKIP_BUILD = true
+                    }
+                }
             }
          }
 
-
-         //stage('Check Commit') {
-         //    steps {
-         //       script {
-         //   def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
-
-         //   if (commitMessage.contains('[ci skip]')) {
-         //       echo 'This is an automated commit. Skipping build.'
-         //               currentBuild.result = 'SUCCESS'
-         //       error ("Skipping build")
-         //   }
-         //}
-         //   }
-         //}
-
         stage('Build Docker Image') {
             steps {
-                 container ('docker') {
-                    // Build Docker image using docker-compose
-                    sh '''
-                    /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
-                    '''
+                def skipBuild=env.SKIP_BUILD
+                if (skipBuild == null || skipBuild.isEmpty()) {
+                     echo 'starting build ...'
+                     container ('docker') {
+                       // Build Docker image using docker-compose
+                     sh '''
+                     /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
+                     '''
                 }
-            }
+            } else {
+                echo 'skipping build ...'
+             }
+
+            //steps {
+            //     container ('docker') {
+            //        // Build Docker image using docker-compose
+            //        sh '''
+            //        /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
+            //        '''
+            //    }
+            //}
         }
 
         stage('Update Manifests') {
