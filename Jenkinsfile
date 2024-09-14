@@ -123,7 +123,6 @@ pipeline {
                         git add k8s/web-deployment.yaml
                         git commit -m "Update image to ${IMAGE_TAG}"
                         git status
-                        
                         git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/fairy3/KubernetesProject.git
                       """
                     }
