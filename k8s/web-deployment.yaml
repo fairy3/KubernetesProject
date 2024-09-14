@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: rimap2610/web-image:v1.0-181-20240914-141839
+        image: rimap2610/web-image:v1.0-182-20240914-141911
         ports:
         - containerPort: 80
 
