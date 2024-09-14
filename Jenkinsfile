@@ -60,7 +60,14 @@ pipeline {
            }
         }
 
-
+        stage('Initialize') {
+      steps {
+        script {
+          // Initialize Groovy variables
+          env.SKIP_BUILD = ''
+        }
+      }
+    }
          stage('Check Commit') {
              steps {
                 script {
