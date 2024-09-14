@@ -59,6 +59,15 @@ pipeline {
            }
         }
 
+         stage('Check Commit') {
+            def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+
+            if (commitMessage.contains('[ci skip]')) {
+                echo 'This is an automated commit. Skipping build.'
+                return
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                  container ('docker') {
