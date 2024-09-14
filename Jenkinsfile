@@ -64,7 +64,9 @@ pipeline {
             steps {
                 script {
                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    echo "Commit message: ${commitMessage}"
                     if (commitMessage.contains('[ci skip]')) {
+
                         echo 'This is an automated commit. Skipping build.'
 
                         // Set environment variable to indicate skipping the build
