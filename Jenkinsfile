@@ -48,6 +48,7 @@ pipeline {
         NEXUS_REPOSITORY = "my-docker-repo"
         NEXUS_CREDENTIALS_ID = "nexus"
         GIT_CREDENTIALS_ID = 'github'
+    SKIP_BUILD = '' // Initialize an environment variable
     }
 
     stages {
@@ -66,15 +67,18 @@ pipeline {
                     if (commitMessage.contains('[ci skip]')) {
                         echo 'This is an automated commit. Skipping build.'
 
-                        // Mark the build as success and stop it
-                        currentBuild.result = 'SUCCESS'
-                        exit
+            // Set environment variable to indicate skipping the build
+            env.SKIP_BUILD = 'true'
+            return
                     }
                 }
             }
         }
 
         stage('Build Docker Image') {
+      when {
+        expression { env.SKIP_BUILD != 'true' }
+      }
             steps {
                  container ('docker') {
                     // Build Docker image using docker-compose
@@ -86,6 +90,9 @@ pipeline {
         }
 
         stage('Update Manifests') {
+      when {
+        expression { env.SKIP_BUILD != 'true' }
+      }
             steps {
                 script {
                     // Update the Kubernetes manifests (e.g., deployment.yaml) with the new image tag
