@@ -1,37 +1,30 @@
-
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  annotations:
-    kompose.cmd: kompose convert
-    kompose.version: 1.23.0 (bc7d9f4f)
-  creationTimestamp: null
-  labels:
-    io.kompose.service: app
   name: app
   namespace: demo-app
+  labels:
+    app: app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      io.kompose.service: app
-  strategy: {}
+      app: app
   template:
     metadata:
-      annotations:
-        kompose.cmd: kompose convert
-        kompose.version: 1.23.0 (bc7d9f4f)
-      creationTimestamp: null
       labels:
-        io.kompose.network/my_network: "true"
-        io.kompose.service: app
+        app: app
     spec:
       containers:
-        - image:python-app-image:v1.0-420-20240914-191116
-          name: app
+        - name: app
+          image: python-app-image:v1.0-420-20240914-191116
           ports:
             - containerPort: 5000
-          resources: {}
-      restartPolicy: Always
-status: {}
+
+          resources:
+            requests:
+               memory: "236Mi"
+               cpu: "100m"
+            limits:
+               memory: "512Mi"
+               cpu: "200"
