@@ -70,6 +70,7 @@ pipeline {
             }
         }
 
+        
       // stage('Nexus login') {
       //      steps {
       //          container ('docker') {
