@@ -47,7 +47,7 @@ pipeline {
         NEXUS_URL = "172.24.216.163:8888"
         NEXUS_REPOSITORY = "my-docker-repo"
         NEXUS_CREDENTIALS_ID = "nexus"
-        GIT_CREDENTIALS_ID = "github"
+        GIT_CREDENTIALS_ID = credentials('github')
     }
 
     stages {
@@ -70,7 +70,7 @@ pipeline {
             }
         }
 
-        
+
       // stage('Nexus login') {
       //      steps {
       //          container ('docker') {
