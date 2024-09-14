@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: python-app-image:latest
+          image: rimap2610/python-app-image:v1.0.0-50-20240706-204335
           ports:
             - containerPort: 5000
 
