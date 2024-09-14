@@ -63,7 +63,7 @@ pipeline {
          stage('Check Commit') {
             steps {
                 script {
-                   def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
                     echo "Commit message: ${commitMessage}"
                     if (commitMessage.contains('[ci skip]')) {
 
@@ -77,11 +77,13 @@ pipeline {
         }
 
         stage('Build Docker Image') {
-          when {
-            expression { env.SKIP_BUILD != 'true' }
-          }
             steps {
                  container ('docker') {
+                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    if (commitMessage.contains('[ci skip]')) {
+                        echo 'This is an automated commit. Skipping build.'
+                        return
+                    }
                     // Build Docker image using docker-compose
                     sh '''
                     /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
@@ -91,11 +93,15 @@ pipeline {
         }
 
         stage('Update Manifests') {
-      when {
-        expression { env.SKIP_BUILD != 'true' }
-      }
             steps {
                 script {
+
+                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                    if (commitMessage.contains('[ci skip]')) {
+                        echo 'This is an automated commit. Skipping build.'
+                        return
+                    }
+
                     // Update the Kubernetes manifests (e.g., deployment.yaml) with the new image tag
                     withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                       sh """
