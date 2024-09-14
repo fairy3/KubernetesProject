@@ -77,45 +77,45 @@ pipeline {
          }
 
          stage('Build Docker Image') {
-            if ( ${SKIP_BUILD} != 'true') {
-                steps {
-                    container('docker') {
-                        // Build Docker image using docker-compose
-                        sh '''
-                        /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
-                        '''
-                }
-                }
-            } else {
-              echo 'skipping build'
+      steps {
+        script {
+          if (env.SKIP_BUILD != 'true') {
+            container('docker') {
+              // Build Docker image using docker-compose
+              sh '''
+              /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
+              '''
             }
+          } else {
+            echo 'Skipping Build Docker Image stage due to [ci skip].'
+          }
         }
+      }
+    }
 
-        stage('Update Manifests') {
-
-            steps {
-                script {
-                    // Assuming you build a Docker image and tag it
-                    //def dockerImageTag = ${IMAGE_TAG}
-
-                    // Update the Kubernetes manifests (e.g., deployment.yaml) with the new image tag
-                    withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
-                      sh """
-                        git checkout main
-                        git config --global user.email "fairy3@gmail.com"
-                        git config --global user.name "fairy3"
-                        sed -i 's|image: rimap2610/web-image:.*|image: rimap2610/web-image:${IMAGE_TAG}|g' k8s/web-deployment.yaml
-                        git diff
-                        git add k8s/web-deployment.yaml
-                        git commit -m "Update image to ${IMAGE_TAG} [ci skip]"
-                        git status
-                        git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/fairy3/KubernetesProject.git
-                      """
-                    }
-                }
+       stage('Update Manifests') {
+      steps {
+        script {
+          if (env.SKIP_BUILD != 'true') {
+            // Update the Kubernetes manifests (e.g., deployment.yaml) with the new image tag
+            withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+              sh """
+                git checkout main
+                git config --global user.email "fairy3@gmail.com"
+                git config --global user.name "fairy3"
+                sed -i 's|image: rimap2610/web-image:.*|image: rimap2610/web-image:${IMAGE_TAG}|g' k8s/web-deployment.yaml
+                git add k8s/web-deployment.yaml
+                git commit -m "Update image to ${IMAGE_TAG} [ci skip]"
+                git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/fairy3/KubernetesProject.git
+              """
             }
+          } else {
+            echo 'Skipping Update Manifests stage due to [ci skip].'
+          }
         }
-   }
+      }
+    }
+  }
 
 
     post {
