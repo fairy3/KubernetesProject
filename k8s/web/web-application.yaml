@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: web
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/fairy3/KubernetesProject.git'
+    targetRevision: HEAD
+    path: k8s/web
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: demo-app
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+
