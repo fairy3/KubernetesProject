@@ -106,8 +106,8 @@ pipeline {
       steps {
         container('docker') {
            script {
-             def fullWebImageName = "${env.DOCKER_USERNAME}/${env.WEB_IMAGE_NAME}:${env.IMAGE_TAG}"
-             def fullAppImageName = "${env.DOCKER_USERNAME}/${env.APP_IMAGE_NAME}:${env.IMAGE_TAG}"
+             def fullWebImageName = "rimap2610/${env.WEB_IMAGE_NAME}:${env.IMAGE_TAG}"
+             def fullAppImageName = "rimap2610/${env.APP_IMAGE_NAME}:${env.IMAGE_TAG}"
              sh """
                 docker tag ${WEB_IMAGE_NAME}:latest ${fullWebImageName}
                 docker push ${fullWebImageName}
