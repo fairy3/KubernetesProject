@@ -18,6 +18,7 @@ spec:
       containers:
         - name: app
           image: rimap2610/python-app-image:v1.0-429-20240914-214941
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 5000
 
