@@ -28,7 +28,7 @@ spec:
         io.kompose.service: app
     spec:
       containers:
-        - image: python-app-image:latest
+        - image:python-app-image:v1.0-420-20240914-191116
           name: app
           ports:
             - containerPort: 5000
