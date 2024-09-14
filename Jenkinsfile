@@ -99,6 +99,7 @@ pipeline {
             //    }
             //}
         }
+        }
 
         stage('Update Manifests') {
             steps {
