@@ -77,7 +77,7 @@ pipeline {
          }
 
          stage('Build Docker Image') {
-            if ( ${SKIP_BUILD} != 'true'} {
+            if ( ${SKIP_BUILD} != 'true') {
                 steps {
                     container('docker') {
                         // Build Docker image using docker-compose
@@ -85,7 +85,7 @@ pipeline {
                         /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
                         '''
                 }
-            }
+                }
             } else {
               echo 'skipping build'
             }
