@@ -48,6 +48,7 @@ pipeline {
         NEXUS_REPOSITORY = "my-docker-repo"
         NEXUS_CREDENTIALS_ID = "nexus"
         GIT_CREDENTIALS_ID = 'github'
+        SKIP_BUILD = ''
     }
 
     stages {
@@ -63,45 +64,36 @@ pipeline {
          stage('Check Commit') {
              steps {
                 script {
-                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                     def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                     if (commitMessage.contains('[ci skip]')) {
+                        echo 'This is an automated commit. Skipping build.'
 
-                    if (commitMessage.contains('[ci skip]')) {
-                         echo 'This is an automated commit. Skipping build.'
-                         currentBuild.result = 'SUCCESS'
-                         //error ("Skipping build")
-                         env.SKIP_BUILD = true
-                    }
+                        // Set environment variable to indicate skipping the build
+                        env.SKIP_BUILD = 'true'
+                        return
+                     }
                 }
             }
          }
 
-        stage('Build Docker Image') {
+         stage('Build Docker Image') {
+            when {
+                expression { env.SKIP_BUILD != 'true' }
+            }
             steps {
-                def skipBuild=env.SKIP_BUILD
-                if (skipBuild == null || skipBuild.isEmpty()) {
-                     echo 'starting build ...'
-                     container ('docker') {
-                       // Build Docker image using docker-compose
-                     sh '''
-                     /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
-                     '''
+                container('docker') {
+                    // Build Docker image using docker-compose
+                    sh '''
+                    /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
+                    '''
                 }
-            } else {
-                echo 'skipping build ...'
-             }
-
-            //steps {
-            //     container ('docker') {
-            //        // Build Docker image using docker-compose
-            //        sh '''
-            //        /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
-            //        '''
-            //    }
-            //}
-        }
+            }
         }
 
         stage('Update Manifests') {
+             when {
+                 expression { env.SKIP_BUILD != 'true' }
+             }
             steps {
                 script {
                     // Assuming you build a Docker image and tag it
