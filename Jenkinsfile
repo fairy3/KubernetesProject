@@ -79,6 +79,7 @@ pipeline {
          stage('Build Docker Image') {
       steps {
         script {
+          echo 'skipBuild=' ${SKIP_BUILD}"
           if (env.SKIP_BUILD != 'true') {
             container('docker') {
               // Build Docker image using docker-compose
