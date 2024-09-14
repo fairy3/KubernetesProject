@@ -77,23 +77,22 @@ pipeline {
          }
 
          stage('Build Docker Image') {
-            when {
-                expression { env.SKIP_BUILD != 'true' }
-            }
-            steps {
-                container('docker') {
-                    // Build Docker image using docker-compose
-                    sh '''
-                    /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
-                    '''
+            if ( ${SKIP_BUILD} != 'true'} {
+                steps {
+                    container('docker') {
+                        // Build Docker image using docker-compose
+                        sh '''
+                        /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
+                        '''
                 }
+            }
+            } else {
+              echo 'skipping build'
             }
         }
 
         stage('Update Manifests') {
-             when {
-                 expression { env.SKIP_BUILD != 'true' }
-             }
+
             steps {
                 script {
                     // Assuming you build a Docker image and tag it
