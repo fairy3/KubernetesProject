@@ -68,7 +68,7 @@ pipeline {
 
                         // Mark the build as success and stop it
                         currentBuild.result = 'SUCCESS'
-                        return
+                        exit
                     }
                 }
             }
