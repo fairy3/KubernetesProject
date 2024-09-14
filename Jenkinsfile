@@ -42,7 +42,6 @@ pipeline {
         DOCKER_COMPOSE_FILE = 'docker-compose.yml'
         BUILD_DATE = new Date().format('yyyyMMdd-HHmmss')
         IMAGE_TAG = "v1.0-${BUILD_NUMBER}-${BUILD_DATE}"
-        SNYK_TOKEN = credentials('snyk-token')
         NEXUS_PROTOCOL = "http"
         NEXUS_URL = "172.24.216.163:8888"
         NEXUS_REPOSITORY = "my-docker-repo"
@@ -86,7 +85,6 @@ pipeline {
          stage('Build Docker Image') {
       steps {
         script {
-          echo 'skipBuild=' "${SKIP_BUILD}"
           if (env.SKIP_BUILD != 'true') {
             container('docker') {
               // Build Docker image using docker-compose
