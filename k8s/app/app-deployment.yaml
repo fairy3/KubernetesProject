@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: app
-          image: python-app-image:v1.0-420-20240914-191116
+          image: python-app-image:latest
           ports:
             - containerPort: 5000
 
