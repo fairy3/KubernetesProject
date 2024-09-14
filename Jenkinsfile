@@ -1,5 +1,3 @@
-@Library("my-shared-library") _
-
 def autoCancelled = false
 
 pipeline {
