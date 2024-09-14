@@ -91,6 +91,7 @@ pipeline {
         }
       }
 
+
       //stage('Install Kubernetes') {
       //  steps {
       //       container ('docker') {
