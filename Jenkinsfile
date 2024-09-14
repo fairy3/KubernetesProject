@@ -47,6 +47,7 @@ pipeline {
         NEXUS_URL = "172.24.216.163:8888"
         NEXUS_REPOSITORY = "my-docker-repo"
         NEXUS_CREDENTIALS_ID = "nexus"
+        GIT_CREDENTIALS_ID = 'github-credentials'
     }
 
     stages {
@@ -106,6 +107,8 @@ pipeline {
       stage('Update Manifests') {
             steps {
                 script {
+                 withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
+                    sh """
                     // Assuming you build a Docker image and tag it
                     //def dockerImageTag = ${IMAGE_TAG}
 
@@ -114,7 +117,7 @@ pipeline {
                     git checkout main
                     git config --global user.email "fairy3@gmail.com"
                     git config --global user.name "fairy3"
-                    sed -i 's|image: rimap2610/web-image:.*|image: rimap2610/web-image:${IMAGE_TAG}|g' k8s/app-deployment.yaml
+                    sed -i 's|image: rimap2610/app-image:.*|image: rimap2610/app-image:${IMAGE_TAG}|g' k8s/app-deployment.yaml
                     git diff
                     git add k8s/app-deployment.yaml
                     git commit -m "Update image to ${IMAGE_TAG}"
