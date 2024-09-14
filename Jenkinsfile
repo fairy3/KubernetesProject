@@ -105,15 +105,17 @@ pipeline {
       }
       steps {
         container('docker') {
-            def fullWebImageName = "${env.DOCKER_USERNAME}/${env.WEB_IMAGE_NAME}:${env.IMAGE_TAG}"
-            def fullAppImageName = "${env.DOCKER_USERNAME}/${env.APP_IMAGE_NAME}:${env.IMAGE_TAG}"
-            sh """
-              docker tag ${WEB_IMAGE_NAME}:latest ${fullWebImageName}
-              docker push ${fullWebImageName}
+           script {
+             def fullWebImageName = "${env.DOCKER_USERNAME}/${env.WEB_IMAGE_NAME}:${env.IMAGE_TAG}"
+             def fullAppImageName = "${env.DOCKER_USERNAME}/${env.APP_IMAGE_NAME}:${env.IMAGE_TAG}"
+             sh """
+                docker tag ${WEB_IMAGE_NAME}:latest ${fullWebImageName}
+                docker push ${fullWebImageName}
 
-              docker tag ${APP_IMAGE_NAME}:latest ${fullAppImageName}
-              docker push ${fullAppImageName}
+                docker tag ${APP_IMAGE_NAME}:latest ${fullAppImageName}
+                docker push ${fullAppImageName}
             """
+            }
             }
       }
     }
