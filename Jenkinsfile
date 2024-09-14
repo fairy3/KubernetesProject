@@ -76,6 +76,7 @@ pipeline {
 
                         // Set environment variable to indicate skipping the build
                         env.SKIP_BUILD = 'true'
+                        echo env.SKIP_BUILD
                      }
                 }
             }
@@ -84,6 +85,7 @@ pipeline {
          stage('Build Docker Image') {
       steps {
         script {
+          echo env.SKIP_BUILD
           if (env.SKIP_BUILD != 'true') {
             container('docker') {
               // Build Docker image using docker-compose
@@ -101,6 +103,7 @@ pipeline {
        stage('Update Manifests') {
       steps {
         script {
+          echo env.SKIP_BUILD
           if (env.SKIP_BUILD != 'true') {
             // Update the Kubernetes manifests (e.g., deployment.yaml) with the new image tag
             withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
