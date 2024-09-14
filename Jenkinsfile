@@ -62,11 +62,13 @@ pipeline {
          stage('Check Commit') {
             steps {
                 script {
-                    def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
+                   def commitMessage = sh(script: 'git log -1 --pretty=%B', returnStdout: true).trim()
                     if (commitMessage.contains('[ci skip]')) {
                         echo 'This is an automated commit. Skipping build.'
+
+                        // Mark the build as success and stop it
                         currentBuild.result = 'SUCCESS'
-                        return
+                        error('Stopping build due to [ci skip].')
                     }
                 }
             }
