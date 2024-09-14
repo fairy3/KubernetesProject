@@ -46,6 +46,7 @@ pipeline {
     BUILD_DATE = new Date().format('yyyyMMdd-HHmmss')
     IMAGE_TAG = "v1.0-${BUILD_NUMBER}-${BUILD_DATE}"
     GIT_CREDENTIALS_ID = 'github'
+    DOCKERHUB_CREDENTIALS = 'dockerhub'
   }
 
   stages {
@@ -83,6 +84,40 @@ pipeline {
       }
     }
 
+    stage('Login to Docker Hub') {
+    when {
+        expression { !autoCancelled }
+      }
+      steps {
+        container('docker') {
+          withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+            sh '''
+              echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+            '''
+          }
+        }
+      }
+    }
+
+    stage('Tag and Push To DockerHub') {
+    when {
+        expression { !autoCancelled }
+      }
+      steps {
+        container('docker') {
+            def fullWebImageName = "${env.DOCKER_USERNAME}/${env.WEB_IMAGE_NAME}:${env.IMAGE_TAG}"
+            def fullAppImageName = "${env.DOCKER_USERNAME}/${env.APP_IMAGE_NAME}:${env.IMAGE_TAG}"
+            sh """
+              docker tag ${WEB_IMAGE_NAME}:latest ${fullWebImageName}
+              docker push ${fullWebImageName}
+
+              docker tag ${APP_IMAGE_NAME}:latest ${fullAppImageName}
+              docker push ${fullAppImageName}
+            """
+            }
+      }
+    }
+
     stage('Update Manifests') {
       when {
         expression { !autoCancelled }
@@ -94,8 +129,8 @@ pipeline {
               git checkout main
               git config --global user.email "fairy3@gmail.com"
               git config --global user.name "fairy3"
-              sed -i 's|image: web-image:.*|image: web-image:${IMAGE_TAG}|g' k8s/web/web-deployment.yaml
-              sed -i 's|image: python-app-image::.*|image:python-app-image:${IMAGE_TAG}|g' k8s/app/app-deployment.yaml
+              sed -i 's|image: rimap2610/web-image:.*|image: rimap2610/web-image:${IMAGE_TAG}|g' k8s/web/web-deployment.yaml
+              sed -i 's|image: rimap2610/python-app-image:.*|image: rimap2610/python-app-image:${IMAGE_TAG}|g' k8s/app/app-deployment.yaml
               git add k8s/web/web-deployment.yaml
               git add k8s/app/app-deployment.yaml
               git commit -m "Update image to ${IMAGE_TAG} [ci skip]"
