@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: web
-        image: web-image:v1.0-422-20240914-192151
+        image: web-image:v1.0-424-20240914-202831
         ports:
         - containerPort: 80
 
