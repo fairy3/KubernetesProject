@@ -67,18 +67,17 @@ pipeline {
                     if (commitMessage.contains('[ci skip]')) {
                         echo 'This is an automated commit. Skipping build.'
 
-            // Set environment variable to indicate skipping the build
-            env.SKIP_BUILD = 'true'
-            return
+                        // Set environment variable to indicate skipping the build
+                        env.SKIP_BUILD = 'true'
                     }
                 }
             }
         }
 
         stage('Build Docker Image') {
-      when {
-        expression { env.SKIP_BUILD != 'true' }
-      }
+          when {
+            expression { env.SKIP_BUILD != 'true' }
+          }
             steps {
                  container ('docker') {
                     // Build Docker image using docker-compose
