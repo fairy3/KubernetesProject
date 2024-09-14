@@ -107,7 +107,6 @@ pipeline {
       stage('Update Manifests') {
             steps {
                 script {
-                 withCredentials([usernamePassword(credentialsId: "${GIT_CREDENTIALS_ID}", usernameVariable: 'GIT_USERNAME', passwordVariable: 'GIT_PASSWORD')]) {
                     sh """
                     // Assuming you build a Docker image and tag it
                     //def dockerImageTag = ${IMAGE_TAG}
@@ -117,7 +116,7 @@ pipeline {
                     git checkout main
                     git config --global user.email "fairy3@gmail.com"
                     git config --global user.name "fairy3"
-                    sed -i 's|image: rimap2610/app-image:.*|image: rimap2610/app-image:${IMAGE_TAG}|g' k8s/app-deployment.yaml
+                    sed -i 's|image: rimap2610/python-app-image:.*|image: rimap2610/python-app-image:${IMAGE_TAG}|g' k8s/app-deployment.yaml
                     git diff
                     git add k8s/app-deployment.yaml
                     git commit -m "Update image to ${IMAGE_TAG}"
