@@ -67,7 +67,7 @@ pipeline {
             if (commitMessage.contains('[ci skip]')) {
                 echo 'This is an automated commit. Skipping build.'
                         currentBuild.result = 'SUCCESS'
-                return
+                error ("Skipping build")
             }
         }
             }
