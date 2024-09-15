@@ -1,14 +1,15 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: app
+  name: web
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: 'https://github.com/fairy3/KubernetesProject.git'
     targetRevision: main
-    path:  helm-chart/app
+    #chart: web
+    path: helm-chart/web
     helm:
       valueFiles:
         - values.yaml

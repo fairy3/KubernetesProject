@@ -131,10 +131,8 @@ pipeline {
               git checkout main
               git config --global user.email "fairy3@gmail.com"
               git config --global user.name "fairy3"
-              sed -i 's|image: rimap2610/web-image:.*|image: rimap2610/web-image:${IMAGE_TAG}|g' k8s/web/web-deployment.yaml
-              sed -i 's|image: rimap2610/python-app-image:.*|image: rimap2610/python-app-image:${IMAGE_TAG}|g' k8s/app/app-deployment.yaml
-              git add k8s/web/web-deployment.yaml
-              git add k8s/app/app-deployment.yaml
+              sed -i 's|tag:.*|image: ${IMAGE_TAG}|g' helm-chart/web/values.yaml helm-chart/app/values.yaml
+              git add -u
               git commit -m "Update image to ${IMAGE_TAG} [ci skip]"
               git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/fairy3/KubernetesProject.git
             """
