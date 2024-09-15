@@ -132,6 +132,7 @@ pipeline {
               git config --global user.email "fairy3@gmail.com"
               git config --global user.name "fairy3"
               sed -i 's|tag:.*|tag: ${IMAGE_TAG}|g' helm-chart/web/values.yaml helm-chart/app/values.yaml
+
               git add -u
               git commit -m "Update image to ${IMAGE_TAG} [ci skip]"
               git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/fairy3/KubernetesProject.git
