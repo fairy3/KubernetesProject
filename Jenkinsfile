@@ -111,7 +111,6 @@ pipeline {
              sh """
                 docker tag ${WEB_IMAGE_NAME}:latest ${fullWebImageName}
                 docker push ${fullWebImageName}
-
                 docker tag ${APP_IMAGE_NAME}:latest ${fullAppImageName}
                 docker push ${fullAppImageName}
             """
