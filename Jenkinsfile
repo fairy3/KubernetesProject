@@ -137,6 +137,7 @@ pipeline {
               git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/fairy3/KubernetesProject.git
             """
           }
+
         }
       }
     }
