@@ -114,7 +114,6 @@ pipeline {
                 docker tag ${APP_IMAGE_NAME}:latest ${fullAppImageName}
                 docker push ${fullAppImageName}
             """
-
             }
             }
       }
