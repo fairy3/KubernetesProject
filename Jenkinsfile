@@ -5,6 +5,7 @@ def autoCancelled = false
 pipeline {
   agent {
     kubernetes {
+      label 'ec2-fleet'
       yaml '''
         apiVersion: v1
         kind: Pod
