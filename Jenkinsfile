@@ -25,7 +25,7 @@ pipeline {
             tty: true
             env:
             - name: DOCKER_HOST
-              value: tcp://dind:2375
+              value: tcp://localhost:2375
           - name: dind
             image: docker:27-dind
             securityContext:
@@ -85,14 +85,14 @@ pipeline {
       steps {
         container('docker') {
           sh '''
-          /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
+          docker-compose -f ${DOCKER_COMPOSE_FILE} build
           '''
         }
       }
     }
 
     stage('Login to Docker Hub') {
-    when {
+      when {
         expression { !autoCancelled }
       }
       steps {
@@ -107,7 +107,7 @@ pipeline {
     }
 
     stage('Tag and Push To DockerHub') {
-    when {
+      when {
         expression { !autoCancelled }
       }
       steps {
@@ -144,7 +144,6 @@ pipeline {
               git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/fairy3/KubernetesProject.git
             """
           }
-
         }
       }
     }
