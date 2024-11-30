@@ -25,7 +25,7 @@ pipeline {
             tty: true
             env:
             - name: DOCKER_HOST
-              value: tcp://localhost:2375
+              value: tcp://dind:2375
           - name: dind
             image: docker:27-dind
             securityContext:
@@ -34,7 +34,7 @@ pipeline {
             - name: DOCKER_TLS_CERTDIR
               value: ""
             args:
-            - --host=tcp://localhost:2375
+            - --host=tcp://0.0.0.0:2375
             - --storage-driver=overlay2
       '''
     }
