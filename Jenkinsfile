@@ -18,9 +18,9 @@ spec:
     command:
     - cat
     tty: true
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: docker-sock
+    env:
+    - name: DOCKER_HOST
+      value: tcp://localhost:2375
   - name: dind
     image: docker:27-dind
     securityContext:
@@ -28,12 +28,9 @@ spec:
     env:
     - name: DOCKER_TLS_CERTDIR
       value: ""
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: docker-sock
-  volumes:
-  - name: docker-sock
-    emptyDir: {}
+    args:
+    - --host=tcp://0.0.0.0:2375
+    - --storage-driver=overlay2
       '''
     }
   }
