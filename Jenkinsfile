@@ -5,32 +5,37 @@ def autoCancelled = false
 pipeline {
   agent {
     kubernetes {
-      label 'jenkins-dind'
+      label 'jenkins'
       yaml '''
-apiVersion: v1
-kind: Pod
-metadata:
-  namespace: jenkins
-spec:
-  containers:
-  - name: jenkins-agent
-    image: mecodia/jenkins-kubectl:latest
-    command:
-    - cat
-    tty: true
-    env:
-    - name: DOCKER_HOST
-      value: tcp://localhost:2375
-  - name: dind
-    image: docker:27-dind
-    securityContext:
-      privileged: true
-    env:
-    - name: DOCKER_TLS_CERTDIR
-      value: ""
-    args:
-    - --host=tcp://0.0.0.0:2375
-    - --storage-driver=overlay2
+        apiVersion: v1
+        kind: Pod
+        metadata:
+          namespace: jenkins
+        spec:
+          containers:
+          - name: jenkins-agent
+            image: mecodia/jenkins-kubectl:latest
+            command:
+            - cat
+            tty: true
+          - name: docker
+            image: docker:27
+            command:
+            - cat
+            tty: true
+            env:
+            - name: DOCKER_HOST
+              value: tcp://localhost:2375
+          - name: dind
+            image: docker:27-dind
+            securityContext:
+              privileged: true
+            env:
+            - name: DOCKER_TLS_CERTDIR
+              value: ""
+            args:
+            - --host=tcp://localhost:2375
+            - --storage-driver=overlay2
       '''
     }
   }
@@ -78,24 +83,20 @@ spec:
         expression { !autoCancelled }
       }
       steps {
-        container('jenkins-agent') {
-          script {
-            sh '''
-            # Ensure Docker Daemon is running and functional
-            docker info || (dockerd &) && sleep 10
-            docker-compose -f ${DOCKER_COMPOSE_FILE} build
-            '''
-          }
+        container('docker') {
+          sh '''
+          /usr/local/bin/docker-compose -f ${DOCKER_COMPOSE_FILE} build
+          '''
         }
       }
     }
 
     stage('Login to Docker Hub') {
-      when {
+    when {
         expression { !autoCancelled }
       }
       steps {
-        container('jenkins-agent') {
+        container('docker') {
           withCredentials([usernamePassword(credentialsId: "${DOCKERHUB_CREDENTIALS}", usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
             sh '''
               echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
@@ -106,22 +107,22 @@ spec:
     }
 
     stage('Tag and Push To DockerHub') {
-      when {
+    when {
         expression { !autoCancelled }
       }
       steps {
-        container('jenkins-agent') {
-          script {
-            def fullWebImageName = "rimap2610/${env.WEB_IMAGE_NAME}:${env.IMAGE_TAG}"
-            def fullAppImageName = "rimap2610/${env.APP_IMAGE_NAME}:${env.IMAGE_TAG}"
-            sh """
-              docker tag ${WEB_IMAGE_NAME}:latest ${fullWebImageName}
-              docker push ${fullWebImageName}
-              docker tag ${APP_IMAGE_NAME}:latest ${fullAppImageName}
-              docker push ${fullAppImageName}
+        container('docker') {
+           script {
+             def fullWebImageName = "rimap2610/${env.WEB_IMAGE_NAME}:${env.IMAGE_TAG}"
+             def fullAppImageName = "rimap2610/${env.APP_IMAGE_NAME}:${env.IMAGE_TAG}"
+             sh """
+                docker tag ${WEB_IMAGE_NAME}:latest ${fullWebImageName}
+                docker push ${fullWebImageName}
+                docker tag ${APP_IMAGE_NAME}:latest ${fullAppImageName}
+                docker push ${fullAppImageName}
             """
-          }
-        }
+            }
+            }
       }
     }
 
@@ -143,6 +144,7 @@ spec:
               git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/fairy3/KubernetesProject.git
             """
           }
+
         }
       }
     }
