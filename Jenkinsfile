@@ -22,7 +22,7 @@ spec:
     - mountPath: /var/run/docker.sock
       name: docker-sock
   - name: dind
-    image: docker:20.10-dind
+    image: docker:27-dind
     securityContext:
       privileged: true
     env:
@@ -82,9 +82,13 @@ spec:
       }
       steps {
         container('jenkins-agent') {
-          sh '''
-          docker-compose -f ${DOCKER_COMPOSE_FILE} build
-          '''
+          script {
+            sh '''
+            # Ensure Docker Daemon is running and functional
+            docker info || (dockerd &) && sleep 10
+            docker-compose -f ${DOCKER_COMPOSE_FILE} build
+            '''
+          }
         }
       }
     }
