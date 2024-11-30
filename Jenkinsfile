@@ -78,6 +78,34 @@ pipeline {
       }
     }
 
+    stage('Wait for Docker Daemon') {
+      steps {
+        container('docker') {
+          script {
+            def maxAttempts = 10
+            def attempt = 0
+            def success = false
+
+            while (attempt < maxAttempts && !success) {
+              try {
+                sh 'docker info'
+                success = true
+                echo "Docker daemon is ready."
+              } catch (Exception e) {
+                attempt++
+                echo "Waiting for Docker daemon to start... Attempt ${attempt}/${maxAttempts}"
+                sleep 5
+              }
+            }
+
+            if (!success) {
+              error "Docker daemon did not become ready after ${maxAttempts} attempts."
+            }
+          }
+        }
+      }
+    }
+
     stage('Build Docker Image') {
       when {
         expression { !autoCancelled }
