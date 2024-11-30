@@ -134,3 +134,5 @@ Integrate ArgoCD with Jenkins:
 Use the ArgoCD CLI in the Jenkins pipeline to automate deployments.
 Test the Integration by making changes to the application and observing the automated deployment via ArgoCD.
 
+
+
