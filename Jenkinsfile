@@ -187,5 +187,8 @@ pipeline {
     failure {
       echo "Build ${BUILD_NUMBER} has failed"
     }
+    aborted {
+      sleep 3
+      echo "Build ${BUILD_NUMBER} has aborted"
   }
 }
