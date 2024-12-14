@@ -188,3 +188,4 @@ pipeline {
       echo "Build ${BUILD_NUMBER} has failed"
     }
 }
+}
