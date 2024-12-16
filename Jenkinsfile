@@ -82,7 +82,7 @@ pipeline {
       steps {
         container('docker') {
           script {
-            def maxAttempts = 2
+            def maxAttempts = 3
             def attempt = 0
             def success = false
 
