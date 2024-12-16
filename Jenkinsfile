@@ -94,7 +94,7 @@ pipeline {
               } catch (Exception e) {
                 attempt++
                 echo "Waiting for Docker daemon to start... Attempt ${attempt}/${maxAttempts}"
-                sleep 5
+                sleep 1
               }
             }
 
@@ -188,7 +188,7 @@ pipeline {
       echo "Build ${BUILD_NUMBER} has failed"
     }
     aborted {
-      sleep 120
+      sleep 100
       echo "Build ${BUILD_NUMBER} has aborted"
     }    
 }
